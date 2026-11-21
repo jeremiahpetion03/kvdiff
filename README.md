@@ -84,3 +84,5 @@ repro2.py     deterministic reproduction and first-bad-module localization
 results.json  kvdiff output from the run above
 triage.json   triage output from the run above
 ```
+
+**Note on `triage.json`:** the committed file was generated before the `NON-FINITE` fix in `triage.py`. For Qwen2.5 eager fp16, row 0 (the 3-token prompt), its cached-path error is NaN but the file labels the row `rounding`. The current script reports that row as `NON-FINITE`. Re-running `python triage.py` regenerates the file.
