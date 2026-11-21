@@ -1,0 +1,396 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B",
+  "attn": "eager",
+  "dtype": "fp16",
+  "prompt_lengths": [
+    3,
+    29,
+    31,
+    7,
+    21,
+    37
+  ],
+  "batch_shape": [
+    6,
+    37
+  ],
+  "pad_tokens_per_row": [
+    34,
+    8,
+    6,
+    30,
+    16,
+    0
+  ],
+  "torch": "2.11.0+cu128",
+  "hooks_bit_identical": true,
+  "first_nonfinite": {
+    "module": "model.layers.1.self_attn.o_proj",
+    "first_bad_index": [
+      0,
+      0,
+      0
+    ],
+    "first_bad_is_padding_position": true,
+    "inputs": [
+      {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 2176,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 2.701171875,
+        "max_abs_by_position": {
+          "pad": Infinity,
+          "real": 2.701171875
+        }
+      }
+    ],
+    "output": {
+      "shape": [
+        6,
+        37,
+        896
+      ],
+      "dtype": "torch.float16",
+      "device": "cuda:0",
+      "n_nan": 30464,
+      "n_posinf": 0,
+      "n_neginf": 0,
+      "max_abs_finite": 1.6875,
+      "max_abs_by_position": {
+        "pad": Infinity,
+        "real": 1.6875
+      }
+    }
+  },
+  "attention_probe": {
+    "layer_0": {
+      "o_proj_input": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 0,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 0.27099609375,
+        "max_abs_by_position": {
+          "pad": 0.1763916015625,
+          "real": 0.27099609375
+        }
+      },
+      "o_proj_output": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 0,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 0.491455078125,
+        "max_abs_by_position": {
+          "pad": 0.287841796875,
+          "real": 0.491455078125
+        }
+      },
+      "o_proj_output_recomputed_fp32": {
+        "max_abs_by_position": {
+          "pad": 0.28779137134552,
+          "real": 0.49154746532440186
+        },
+        "exceeds_fp16_max": false
+      },
+      "mask": {
+        "shape": [
+          6,
+          1,
+          37,
+          37
+        ],
+        "dtype": "torch.float16",
+        "min": -65504.0,
+        "has_neg_inf": false,
+        "dtype_min": -65504.0
+      },
+      "attn_weights": {
+        "shape": [
+          6,
+          14,
+          37,
+          37
+        ],
+        "dtype": "torch.float16",
+        "pad": {
+          "n_query_rows": 94,
+          "finite": true,
+          "row_sum_min": 0.99969482421875,
+          "row_sum_max": 1.00030517578125,
+          "max_weight": 0.125,
+          "fraction_uniform_rows": 0.697568416595459
+        },
+        "real": {
+          "n_query_rows": 128,
+          "finite": true,
+          "row_sum_min": 0.9996503591537476,
+          "row_sum_max": 1.000319242477417,
+          "max_weight": 1.0,
+          "fraction_uniform_rows": 0.0
+        }
+      }
+    },
+    "layer_1": {
+      "o_proj_input": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 2176,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 2.701171875,
+        "max_abs_by_position": {
+          "pad": Infinity,
+          "real": 2.701171875
+        }
+      },
+      "o_proj_output": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 30464,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 1.6875,
+        "max_abs_by_position": {
+          "pad": Infinity,
+          "real": 1.6875
+        }
+      },
+      "o_proj_output_recomputed_fp32": {
+        "max_abs_by_position": {
+          "pad": Infinity,
+          "real": 1.6870203018188477
+        },
+        "exceeds_fp16_max": false
+      },
+      "mask": {
+        "shape": [
+          6,
+          1,
+          37,
+          37
+        ],
+        "dtype": "torch.float16",
+        "min": -65504.0,
+        "has_neg_inf": false,
+        "dtype_min": -65504.0
+      },
+      "attn_weights": {
+        "shape": [
+          6,
+          14,
+          37,
+          37
+        ],
+        "dtype": "torch.float16",
+        "pad": {
+          "n_query_rows": 94,
+          "finite": false,
+          "row_sum_min": NaN,
+          "row_sum_max": NaN,
+          "max_weight": NaN,
+          "fraction_uniform_rows": 0.8753799200057983
+        },
+        "real": {
+          "n_query_rows": 128,
+          "finite": true,
+          "row_sum_min": 0.9996776580810547,
+          "row_sum_max": 1.0003662109375,
+          "max_weight": 1.0,
+          "fraction_uniform_rows": 0.0
+        }
+      }
+    }
+  },
+  "kv_cache_after_prefill": [
+    {
+      "layer": 2,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 0
+    },
+    {
+      "layer": 3,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 4,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 5,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 6,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 7,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 8,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 9,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 10,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 11,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 12,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 13,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 14,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 15,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 16,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 17,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 18,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 19,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 20,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 21,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 22,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    },
+    {
+      "layer": 23,
+      "nonfinite_pad_positions": 34,
+      "nonfinite_real_positions": 3
+    }
+  ],
+  "prefill_last_token_logits_nonfinite_rows": [
+    0
+  ],
+  "decode_nonfinite_rows_by_step": [
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ]
+  ]
+}

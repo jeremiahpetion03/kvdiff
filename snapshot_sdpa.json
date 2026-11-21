@@ -1,0 +1,161 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B",
+  "attn": "sdpa",
+  "dtype": "fp16",
+  "prompt_lengths": [
+    3,
+    29,
+    31,
+    7,
+    21,
+    37
+  ],
+  "batch_shape": [
+    6,
+    37
+  ],
+  "pad_tokens_per_row": [
+    34,
+    8,
+    6,
+    30,
+    16,
+    0
+  ],
+  "torch": "2.11.0+cu128",
+  "hooks_bit_identical": true,
+  "first_nonfinite": null,
+  "attention_probe": {
+    "layer_0": {
+      "o_proj_input": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 0,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 0.27099609375,
+        "max_abs_by_position": {
+          "pad": 0.0,
+          "real": 0.27099609375
+        }
+      },
+      "o_proj_output": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 0,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 0.491943359375,
+        "max_abs_by_position": {
+          "pad": 0.0,
+          "real": 0.491943359375
+        }
+      },
+      "o_proj_output_recomputed_fp32": {
+        "max_abs_by_position": {
+          "pad": 0.0,
+          "real": 0.4920561909675598
+        },
+        "exceeds_fp16_max": false
+      },
+      "mask": {
+        "shape": [
+          6,
+          1,
+          37,
+          37
+        ],
+        "dtype": "torch.bool",
+        "min": 0.0,
+        "has_neg_inf": false,
+        "dtype_min": null
+      },
+      "attn_weights": "not returned by this attention implementation"
+    },
+    "layer_1": {
+      "o_proj_input": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 0,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 2.69921875,
+        "max_abs_by_position": {
+          "pad": 0.0,
+          "real": 2.69921875
+        }
+      },
+      "o_proj_output": {
+        "shape": [
+          6,
+          37,
+          896
+        ],
+        "dtype": "torch.float16",
+        "device": "cuda:0",
+        "n_nan": 0,
+        "n_posinf": 0,
+        "n_neginf": 0,
+        "max_abs_finite": 1.6875,
+        "max_abs_by_position": {
+          "pad": 0.0,
+          "real": 1.6875
+        }
+      },
+      "o_proj_output_recomputed_fp32": {
+        "max_abs_by_position": {
+          "pad": 0.0,
+          "real": 1.6870203018188477
+        },
+        "exceeds_fp16_max": false
+      },
+      "mask": {
+        "shape": [
+          6,
+          1,
+          37,
+          37
+        ],
+        "dtype": "torch.bool",
+        "min": 0.0,
+        "has_neg_inf": false,
+        "dtype_min": null
+      },
+      "attn_weights": "not returned by this attention implementation"
+    }
+  },
+  "kv_cache_after_prefill": "all finite",
+  "prefill_last_token_logits_nonfinite_rows": [],
+  "decode_nonfinite_rows_by_step": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
+}
