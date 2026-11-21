@@ -31,23 +31,30 @@ Run on an NVIDIA RTX 3060, PyTorch 2.15 (CUDA 13.4), Transformers 5.23. Models: 
 Re-running the exact inputs 30 times ([`repro2.py`](repro2.py)):
 
 - **NaN logits in 30/30 runs**, bit-identical every time, always on the 3-token prompt with 34 padding tokens.
-- A forward hook on every module locates the **first non-finite value in `model.layers.1.self_attn.o_proj`, during prefill.**
+- A forward hook on every module reports the first **module** whose output is non-finite: `model.layers.1.self_attn.o_proj`, during prefill. Direct instrumentation (below) showed the NaN is created earlier, inside the attention math, which is not a module.
 - Controls: the same row **without padding** is clean. **sdpa** is clean. **bf16** is clean. **fp32** is clean.
 
-**Likely mechanism.** This is consistent with the data, but the propagation step is not yet directly instrumented:
+**Mechanism, measured.** [`snapshot.py`](snapshot.py) copies every module's inputs before it runs and stops at the first non-finite output, with logits bit-identical with hooks on and off. [`confirm_mask_overflow.py`](confirm_mask_overflow.py) then recomputes the eager attention scores. Results: [`snapshot.json`](snapshot.json), [`snapshot_sdpa.json`](snapshot_sdpa.json), [`confirm_mask_overflow.json`](confirm_mask_overflow.json).
 
-1. A left-padding position has no key it may attend to. Eager attention gives every key the same masked score, so the softmax averages over all positions and produces a meaningless value.
-2. For these inputs that value overflows fp16 (max 65,504) in layer 1's output projection.
-3. The infinity enters the residual stream and the KV cache at the padding position.
-4. Real tokens give that position an attention weight of exactly 0, but 0 × ∞ = NaN, so masked padding contaminates real outputs.
+1. Eager attention adds an additive mask whose masked value is fp16's minimum, **−65,504** (not −∞).
+2. Near 65,504, adjacent fp16 values are 32 apart, so `score + (−65,504)` rounds to **−∞** once the score is below about −16.
+3. In **layer 1, head 9**, for all **34 padding query positions** of the 3-token row, every key's score was below that threshold (the highest was **−17.375**). Every masked score became −∞. The same sum in fp32 produced no −∞.
+4. Softmax over a row that is entirely −∞ is NaN. The NaN softmax rows were **exactly** the all-−∞ rows (34 of 34). Layer 0 had none.
+5. The NaN flows through `o_proj` (its input already held 2,176 NaN = 34 positions × 64 head dimensions, and no infinities) into the residual stream, and into the KV cache at all 34 padding positions from layer 2 on.
+6. In layer 2, the padding positions' keys are NaN. Masking can't remove them, because NaN + (−65,504) is still NaN, and one NaN score makes a whole softmax row NaN: all **518** of that sequence's attention rows in layer 2 (37 query positions × 14 heads) were NaN. From layer 3 on, the row's 3 real tokens are non-finite in the KV cache too, and its logits are NaN right after prefill.
 
-sdpa handles fully masked rows differently (max padding-position activation 57.9 vs 1,281 for eager on other inputs), which is consistent with it staying clean.
+sdpa receives a boolean mask instead, outputs exact zeros at padding positions, and stays finite. bf16 and fp32 have exponent range to spare, so adding their minimum to a score of −17 does not overflow.
+
+**My first hypothesis was wrong.** I had attributed the NaN to an activation overflowing fp16 in layer 1's `o_proj`, because that was the first module the hooks flagged. Instrumenting inside the module showed `o_proj`'s input was already NaN, and recomputing `o_proj` in fp32 never exceeds 65,504 at real positions. Module-level hooks can only blame modules; this failure happens in functional code between them.
+
+**Possible fixes (not yet tested):** add the mask in fp32 before the softmax (the fp32 sum above produced no −∞), or zero out fully masked query rows, as sdpa effectively does.
 
 **Prior report.** The symptom (Qwen2, eager attention, fp16 → NaN) was reported in Transformers PR [#33317](https://github.com/huggingface/transformers/pull/33317) (September 2024), which was closed. This project rediscovered it independently through differential testing and narrows it to a specific layer, input condition, and decoding path. It still reproduces in Transformers 5.23.
 
-### A hypothesis this project ruled out
+### Hypotheses this project ruled out
 
-The first reproduction ([`repro.py`](repro.py)) tested overflow with different prompts. All 100 trials were clean, and padding-position activations peaked at 1,281, about 50x below fp16's limit. Overflow depends on the specific input, so a generic "padding overflows fp16" claim would have been wrong. The deterministic reproduction above uses the exact inputs that failed.
+- **"Padding activations overflow fp16."** The first reproduction ([`repro.py`](repro.py)) used different prompts: all 100 trials were clean, and padding-position activations peaked at 1,281, about 50x below fp16's limit.
+- **"Layer 1's `o_proj` overflows."** Ruled out by direct instrumentation, as described above: the NaN comes from the attention mask overflowing to −∞, not from a large activation.
 
 ### Open question
 
@@ -83,6 +90,9 @@ repro.py      controlled test of the overflow hypothesis
 repro2.py     deterministic reproduction and first-bad-module localization
 results.json  kvdiff output from the run above
 triage.json   triage output from the run above
+snapshot.py   first-non-finite snapshot + attention probe (inputs copied before each module runs)
+confirm_mask_overflow.py  measures whether fp16 score + mask rounds to -inf
+snapshot*.json, confirm_mask_overflow.json  outputs of the two scripts above (RTX 3060)
 ```
 
 **Note on `triage.json`:** the committed file was generated before the `NON-FINITE` fix in `triage.py`. For Qwen2.5 eager fp16, row 0 (the 3-token prompt), its cached-path error is NaN but the file labels the row `rounding`. The current script reports that row as `NON-FINITE`. Re-running `python triage.py` regenerates the file.
