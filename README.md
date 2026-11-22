@@ -56,13 +56,30 @@ sdpa receives a boolean mask instead, outputs exact zeros at padding positions, 
 | Original (Transformers) | row 0 | — | NaN | — |
 | My copy, no fix (control) | row 0 | bit-identical | NaN | — |
 | **Add the mask in fp32** | none | **bit-identical** | 0.0545 | 16/16 |
-| **Zero rows with no allowed key** | none | **bit-identical** | 0.0545 | 16/16 |
+| **Zero rows with no allowed key** (forward only; see the backward pass below) | none | **bit-identical** | 0.0545 | 16/16 |
 | sdpa fp16 (baseline) | none | different kernel | 0.0336 | 16/16 |
 
 - The control reproduces the library's output bit for bit, including the NaN, so the comparison is valid.
 - Both fixes change nothing for the rows the bug never touched, and leave row 0 as accurate as the other eager rows (0.041–0.071).
 - Both give row 0 identical numbers: real tokens give padding keys a weight of exactly 0, so what a padding row holds doesn't matter, as long as it is finite.
 - sdpa is slightly more accurate on every row, a kernel difference that predates either fix.
+
+**Backward pass** ([`backward_check.py`](backward_check.py), results in [`backward_check.json`](backward_check.json)). The same failing input with labels and `loss.backward()`, as in training or fine-tuning (Qwen2.5-0.5B, fp16 weights; padding labels are -100, so the loss covers the 2 predictions made from real tokens). An fp32 eager model gives the reference gradient (norm 1721.1).
+
+| Variant | Loss | Non-finite gradient elements | Gradient norm | Cosine vs fp32 gradient |
+|---|---|---|---|---|
+| Original (Transformers) | NaN | 494,032,768 of 494,032,768 | NaN | — |
+| Add the mask in fp32 | 6.064 | 0 | 1447.3 | 0.799 |
+| Zero rows after the softmax | 6.187 | **119,418,368 (24.2%)** | NaN | — |
+| Zero rows, softmax input set to 0 first (`zero_rows_safe`) | 6.187 | 0 | 1807.8 | 0.419 |
+| sdpa fp16 (baseline) | 6.190 | 0 | 1807.7 | 0.419 |
+
+- **The bug breaks training, not only inference.** One fully masked row makes the loss NaN and every gradient element NaN.
+- **Zeroing the weights after the softmax is not enough.** The forward output is finite and identical to the safe variant's (same loss), but the softmax output for those rows is still NaN, and its backward pass multiplies by it, so 24.2% of the gradient elements are NaN. I had assumed zero weights would mean zero gradient. This measurement shows that assumption was wrong. The version that works replaces the softmax input for those rows with 0 before the softmax, then zeroes the weights.
+- The safe variant's gradient norm and cosine match sdpa's to four digits (1807.8 vs 1807.7; 0.41906 vs 0.41902), as expected, since both output zero weights for those rows.
+- **Limits:** one 3-token input, fp16 weights with no master copy, so cosines against fp32 are low even for sdpa (a finite control). The fp32-mask gradient scored higher (0.80) than the sdpa-like variants (0.42); that is one input, so I read it as suggestive, not established.
+
+A model-free regression test, [`test_mask_overflow_regression.py`](test_mask_overflow_regression.py), builds the failing attention problem directly and checks the original function (non-finite on fully masked rows), both finite fixes, bit-identical unaffected rows, finite gradients for the fp32 and safe variants, and the naive zeroing's NaN gradients as a documented expected failure. Run on the machine above: 12 passed, 1 expected failure.
 
 **Prior report.** The symptom (Qwen2, eager attention, fp16 → NaN) was reported in Transformers PR [#33317](https://github.com/huggingface/transformers/pull/33317) (September 2024), which was closed. That PR attributed the NaN to q·k overflow on long inputs and proposed computing q·k and the mask addition in fp32. This project rediscovered the symptom independently through differential testing and measured a different trigger: the mask addition overflows with modest negative scores on fully masked padding rows. The fp32 mask addition from that PR would also prevent it. It still reproduces in Transformers 5.23, with a standalone script: [`minimal_repro.py`](minimal_repro.py).
 
@@ -112,7 +129,9 @@ confirm_mask_overflow.py  measures whether fp16 score + mask rounds to -inf
 snapshot*.json, confirm_mask_overflow.json  outputs of the two scripts above (RTX 3060)
 confirm_mask_overflow_full.json  the same check on the padded full forward pass (no overflow)
 minimal_repro.py  standalone reproduction (torch + transformers only): one prompt, controls, pad-count sweep
-test_fixes.py  tests the two fixes against an fp32 reference, with a bit-identical control
+test_fixes.py  tests the fixes against an fp32 reference, with a bit-identical control (also holds the backward-safe variant)
 test_fixes.json  its results (RTX 3060)
+backward_check.py / .json  loss.backward() on the failing input: NaN gradients, and which fixes repair them
+test_mask_overflow_regression.py  model-free pytest regression test of the overflow and the fixes (forward and backward)
 ```
 
