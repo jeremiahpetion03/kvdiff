@@ -64,7 +64,7 @@ sdpa receives a boolean mask instead, outputs exact zeros at padding positions, 
 - Both give row 0 identical numbers: real tokens give padding keys a weight of exactly 0, so what a padding row holds doesn't matter, as long as it is finite.
 - sdpa is slightly more accurate on every row, a kernel difference that predates either fix.
 
-**Prior report.** The symptom (Qwen2, eager attention, fp16 → NaN) was reported in Transformers PR [#33317](https://github.com/huggingface/transformers/pull/33317) (September 2024), which was closed. This project rediscovered it independently through differential testing and narrows it to a specific layer, input condition, and decoding path. It still reproduces in Transformers 5.23.
+**Prior report.** The symptom (Qwen2, eager attention, fp16 → NaN) was reported in Transformers PR [#33317](https://github.com/huggingface/transformers/pull/33317) (September 2024), which was closed. That PR attributed the NaN to q·k overflow on long inputs and proposed computing q·k and the mask addition in fp32. This project rediscovered the symptom independently through differential testing and measured a different trigger: the mask addition overflows with modest negative scores on fully masked padding rows. The fp32 mask addition from that PR would also prevent it. It still reproduces in Transformers 5.23, with a standalone script: [`minimal_repro.py`](minimal_repro.py).
 
 ### Hypotheses this project ruled out
 
@@ -109,6 +109,7 @@ snapshot.py   first-non-finite snapshot + attention probe (inputs copied before 
 confirm_mask_overflow.py  measures whether fp16 score + mask rounds to -inf
 snapshot*.json, confirm_mask_overflow.json  outputs of the two scripts above (RTX 3060)
 confirm_mask_overflow_full.json  the same check on the padded full forward pass (no overflow)
+minimal_repro.py  standalone reproduction (torch + transformers only): one prompt, controls, pad-count sweep
 test_fixes.py  tests the two fixes against an fp32 reference, with a bit-identical control
 test_fixes.json  its results (RTX 3060)
 ```
