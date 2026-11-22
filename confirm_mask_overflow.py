@@ -52,6 +52,16 @@ def wrapped(module, query, key, value, attention_mask, scaling, *args, **kwargs)
             entry["heads"] = sorted(set(h.tolist()))
             entry["query_positions"] = sorted(set(q.tolist()))
             entry["max_raw_score_in_those_rows"] = float(scores[all_inf].float().max())
+        # Row 0 (the 3-token prompt): its padding query rows, per head.
+        pad0 = int((m[0, 0] < 0).all(-1).sum()) if m.shape[0] > 0 else 0  # query rows with no allowed key
+        allowed = (m[0, 0] == 0).sum(-1)                                     # allowed keys per query row
+        n_pad = int((torch.arange(m.shape[-2], device=m.device) < 34).sum()) if m.shape[-2] >= 34 else 0
+        if n_pad:
+            raw_max = scores[0, :, :34].float().amax(-1)                     # (H, 34) best raw score per padding row
+            entry["row0_padding_rows_with_no_allowed_key"] = pad0
+            entry["row0_allowed_keys_first_34_query_rows"] = sorted(set(allowed[:34].tolist()))
+            entry["row0_padding_rows_max_raw_score_per_head"] = [round(float(v), 3) for v in raw_max.amax(-1)]
+            entry["row0_padding_rows_min_of_row_max_per_head"] = [round(float(v), 3) for v in raw_max.amin(-1)]
         if nan_rows is not None:
             entry["softmax_nan_rows"] = int(nan_rows.sum())
             entry["nan_rows_equal_all_neg_inf_rows"] = bool(torch.equal(nan_rows, all_inf))
