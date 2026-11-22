@@ -14,9 +14,11 @@ measures on kvdiff's exact failing inputs:
   * whether the NaN softmax rows are exactly the all -inf rows.
 It does not change the computation: the original function runs unchanged.
 
-    python confirm_mask_overflow.py
+    python confirm_mask_overflow.py               # cached prefill (prompt only), where the NaN occurs
+    python confirm_mask_overflow.py --path full   # padded full forward (prompt + continuation, no cache)
 """
 
+import argparse
 import json
 
 import torch
@@ -58,6 +60,9 @@ def wrapped(module, query, key, value, attention_mask, scaling, *args, **kwargs)
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--path", choices=["prefill", "full"], default="prefill")
+    args = ap.parse_args()
     configure_determinism()
     qwen2.eager_attention_forward = wrapped
     device = torch.device("cuda")
@@ -66,20 +71,28 @@ def main():
     rows = make_rows(tok, 6, 16, 0)
     model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.float16,
                                                  attn_implementation="eager").to(device).eval()
-    ids, mask = left_pad([p for p, _ in rows], pad_id, device)
+    seqs = [p for p, _ in rows] if args.path == "prefill" else [p + c[:15] for p, c in rows]
+    ids, mask = left_pad(seqs, pad_id, device)
+    report["path"] = args.path
+    report["batch_shape"] = list(ids.shape)
+    report["pad_tokens_per_row"] = (mask == 0).sum(1).tolist()
     with torch.no_grad():
-        out = model(input_ids=ids, attention_mask=mask, position_ids=positions_from_mask(mask), use_cache=True)
+        out = model(input_ids=ids, attention_mask=mask, position_ids=positions_from_mask(mask),
+                    use_cache=(args.path == "prefill"))
     qwen2.eager_attention_forward = original
     report["called"] = bool(report)
-    report["prefill_logits_nonfinite_rows"] = (~torch.isfinite(out.logits[:, -1])).any(-1).nonzero().flatten().tolist()
+    report["logits_nonfinite_rows"] = (~torch.isfinite(out.logits)).flatten(1).any(1).nonzero().flatten().tolist()
+    print("path:", args.path, "| shape:", report["batch_shape"], "| pad per row:", report["pad_tokens_per_row"])
     for name in ("layer_0", "layer_1", "layer_2"):
         if name in report:
             print(name, json.dumps(report[name]))
-    with open("confirm_mask_overflow.json", "w", encoding="utf-8") as f:
+    out_name = "confirm_mask_overflow.json" if args.path == "prefill" else "confirm_mask_overflow_full.json"
+    with open(out_name, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     print("\nlayers with all -inf rows:", [k for k, v in report.items()
                                           if isinstance(v, dict) and v.get("rows_all_neg_inf_fp16")])
-    print("wrote confirm_mask_overflow.json")
+    print("logits non-finite rows:", report["logits_nonfinite_rows"])
+    print("wrote", out_name)
 
 
 if __name__ == "__main__":

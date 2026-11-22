@@ -190,7 +190,8 @@ def logit_result(name, attn, dtype_name, check, pairs) -> Result:
     worst, flips, real = 0.0, 0, 0
     for test, ref in pairs:
         rel, f, r = compare_logits(test, ref, dtype_name)
-        worst = rel if (math.isnan(rel) or math.isnan(worst)) else max(worst, rel)
+        # Once any row is NaN the check's worst error stays NaN (a later finite row must not overwrite it).
+        worst = math.nan if (math.isnan(rel) or math.isnan(worst)) else max(worst, rel)
         flips, real = flips + f, real + r
     ok = (not math.isnan(worst)) and worst <= REL_TOL[dtype_name] and real == 0
     return Result(name, attn, dtype_name, check, "OK" if ok else "FLAG", worst, flips, real)
