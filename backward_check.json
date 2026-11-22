@@ -1,0 +1,57 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B",
+  "torch": "2.15.0+cu134",
+  "prompt": [
+    1483,
+    311,
+    387
+  ],
+  "n_pad": 34,
+  "variants": {
+    "original": {
+      "loss": null,
+      "loss_finite": false,
+      "nonfinite_grad_elements": 494032768,
+      "total_grad_elements": 494032768,
+      "grad_norm": null,
+      "cosine_vs_fp32_grad": null
+    },
+    "fp32_mask": {
+      "loss": 6.0642170906066895,
+      "loss_finite": true,
+      "nonfinite_grad_elements": 0,
+      "total_grad_elements": 494032768,
+      "grad_norm": 1447.285058926021,
+      "cosine_vs_fp32_grad": 0.7993494806661401
+    },
+    "zero_masked_rows": {
+      "loss": 6.18675422668457,
+      "loss_finite": true,
+      "nonfinite_grad_elements": 119418368,
+      "total_grad_elements": 494032768,
+      "grad_norm": null,
+      "cosine_vs_fp32_grad": null
+    },
+    "zero_rows_safe": {
+      "loss": 6.18675422668457,
+      "loss_finite": true,
+      "nonfinite_grad_elements": 0,
+      "total_grad_elements": 494032768,
+      "grad_norm": 1807.8160551563515,
+      "cosine_vs_fp32_grad": 0.41905503763914875
+    },
+    "sdpa_baseline": {
+      "loss": 6.189961910247803,
+      "loss_finite": true,
+      "nonfinite_grad_elements": 0,
+      "total_grad_elements": 494032768,
+      "grad_norm": 1807.718062954876,
+      "cosine_vs_fp32_grad": 0.41902007579436984
+    }
+  },
+  "fp32_reference": {
+    "nonfinite_grad_elements": 0,
+    "total_grad_elements": 494032768,
+    "grad_norm": 1721.1217164762845
+  }
+}

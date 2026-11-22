@@ -11,6 +11,9 @@ Variants of the eager attention function, each run on the same inputs:
   fp32_mask         add the mask in fp32 before the softmax
   zero_masked_rows  as original, then set the weights of query rows that
                     have no allowed key to 0 (what sdpa effectively outputs)
+  zero_rows_safe    like zero_masked_rows, but the softmax input for those rows is
+                    replaced by 0 first, so gradients stay finite (added after
+                    backward_check.py showed zero_masked_rows has NaN gradients)
 
 For each variant: non-finite rows at prefill and over 15 teacher-forced
 decode steps; whether the rows the bug never touched stay bit-identical to
@@ -41,9 +44,15 @@ def make_eager(fix):
         mask = None if attention_mask is None else attention_mask[:, :, :, : k.shape[-2]]
         if mask is not None:
             scores = scores.float() + mask.float() if fix == "fp32_mask" else scores + mask
-        w = nn.functional.softmax(scores, dim=-1, dtype=torch.float32).to(query.dtype)
-        if fix == "zero_masked_rows" and mask is not None:
+        no_allowed_key = None
+        if mask is not None and fix in ("zero_masked_rows", "zero_rows_safe"):
             no_allowed_key = (mask < 0).all(-1, keepdim=True)            # (B, 1, Tq, 1)
+        if fix == "zero_rows_safe":
+            # Same output as zero_masked_rows, but the softmax never sees -inf rows, so the
+            # backward pass has no NaN to multiply by (see backward_check.py).
+            scores = scores.masked_fill(no_allowed_key, 0.0)
+        w = nn.functional.softmax(scores, dim=-1, dtype=torch.float32).to(query.dtype)
+        if no_allowed_key is not None:
             w = w.masked_fill(no_allowed_key, 0.0)
         w = nn.functional.dropout(w, p=dropout, training=module.training)
         out = torch.matmul(w, v).transpose(1, 2).contiguous()
