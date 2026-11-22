@@ -1,0 +1,122 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B",
+  "torch": "2.11.0+cu128",
+  "prompt_lengths": [
+    3,
+    29,
+    31,
+    7,
+    21,
+    37
+  ],
+  "rows_hit_by_bug_in_original": [
+    0
+  ],
+  "variants": {
+    "original": {
+      "nonfinite_rows": [
+        0
+      ],
+      "untouched_rows_bit_identical_to_original": true,
+      "max_abs_diff_vs_fp32_per_row": [
+        null,
+        0.0577,
+        0.0539,
+        0.0711,
+        0.0471,
+        0.0414
+      ],
+      "argmax_agreement_vs_fp32_per_row": [
+        null,
+        1.0,
+        0.938,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "replica": {
+      "nonfinite_rows": [
+        0
+      ],
+      "untouched_rows_bit_identical_to_original": true,
+      "max_abs_diff_vs_fp32_per_row": [
+        null,
+        0.0577,
+        0.0539,
+        0.0711,
+        0.0471,
+        0.0414
+      ],
+      "argmax_agreement_vs_fp32_per_row": [
+        null,
+        1.0,
+        0.938,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "fp32_mask": {
+      "nonfinite_rows": [],
+      "untouched_rows_bit_identical_to_original": true,
+      "max_abs_diff_vs_fp32_per_row": [
+        0.0545,
+        0.0577,
+        0.0539,
+        0.0711,
+        0.0471,
+        0.0414
+      ],
+      "argmax_agreement_vs_fp32_per_row": [
+        1.0,
+        1.0,
+        0.938,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "zero_masked_rows": {
+      "nonfinite_rows": [],
+      "untouched_rows_bit_identical_to_original": true,
+      "max_abs_diff_vs_fp32_per_row": [
+        0.0545,
+        0.0577,
+        0.0539,
+        0.0711,
+        0.0471,
+        0.0414
+      ],
+      "argmax_agreement_vs_fp32_per_row": [
+        1.0,
+        1.0,
+        0.938,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "sdpa_baseline": {
+      "nonfinite_rows": [],
+      "untouched_rows_bit_identical_to_original": false,
+      "max_abs_diff_vs_fp32_per_row": [
+        0.0336,
+        0.0349,
+        0.0389,
+        0.0415,
+        0.0352,
+        0.0301
+      ],
+      "argmax_agreement_vs_fp32_per_row": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "replica_bit_identical_to_original": true
+}
