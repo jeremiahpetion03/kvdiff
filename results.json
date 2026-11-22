@@ -496,7 +496,7 @@
       "dtype": "fp16",
       "check": "cache (cached vs full forward)",
       "status": "FLAG",
-      "max_rel_diff": 0.0029365357477217913,
+      "max_rel_diff": NaN,
       "flips": 17,
       "real_flips": 14,
       "note": ""

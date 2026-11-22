@@ -1,0 +1,209 @@
+{
+  "path": "full",
+  "batch_shape": [
+    6,
+    52
+  ],
+  "pad_tokens_per_row": [
+    34,
+    8,
+    6,
+    30,
+    16,
+    0
+  ],
+  "layer_0": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_1": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_2": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_3": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_4": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_5": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_6": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_7": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_8": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_9": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_10": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_11": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_12": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_13": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_14": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_15": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_16": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_17": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_18": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_19": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_20": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_21": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_22": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "layer_23": {
+    "dtype": "torch.float16",
+    "mask_min": -65504.0,
+    "rows_all_neg_inf_fp16": 0,
+    "rows_with_any_neg_inf_fp32": 0,
+    "softmax_nan_rows": 0,
+    "nan_rows_equal_all_neg_inf_rows": true
+  },
+  "called": true,
+  "logits_nonfinite_rows": []
+}
