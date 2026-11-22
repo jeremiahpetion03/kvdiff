@@ -1,6 +1,6 @@
 {
   "env": {
-    "torch": "2.15.0+cu134",
+    "torch": "2.11.0+cu128",
     "transformers": "5.23.0",
     "python": "3.13.17",
     "device": "cuda",
@@ -56,8 +56,8 @@
       "dtype": "bf16",
       "check": "padding (batched vs alone)",
       "status": "FLAG",
-      "max_rel_diff": 0.009036144241690636,
-      "flips": 13,
+      "max_rel_diff": 0.011627906933426857,
+      "flips": 15,
       "real_flips": 3,
       "note": ""
     },
@@ -79,9 +79,9 @@
       "check": "generate (batched+cache vs alone, no cache)",
       "status": "FLAG",
       "max_rel_diff": null,
-      "flips": 6,
-      "real_flips": 3,
-      "note": "row 0 (prompt len 3) diverges at step 14, ref margin 1.000; row 2 (prompt len 31) diverges at step 3, ref margin 1.000; row 3 (prompt len 7) diverges at step 14, ref margin 1.000"
+      "flips": 5,
+      "real_flips": 1,
+      "note": "row 2 (prompt len 31) diverges at step 3, ref margin 1.000"
     },
     {
       "model": "openai-community/gpt2",
@@ -155,8 +155,8 @@
       "dtype": "bf16",
       "check": "padding (batched vs alone)",
       "status": "FLAG",
-      "max_rel_diff": 0.011299435049295425,
-      "flips": 13,
+      "max_rel_diff": 0.011111111380159855,
+      "flips": 9,
       "real_flips": 1,
       "note": ""
     },
@@ -179,8 +179,8 @@
       "status": "FLAG",
       "max_rel_diff": null,
       "flips": 5,
-      "real_flips": 1,
-      "note": "row 2 (prompt len 31) diverges at step 3, ref margin 1.000"
+      "real_flips": 2,
+      "note": "row 2 (prompt len 31) diverges at step 3, ref margin 1.000; row 4 (prompt len 21) diverges at step 5, ref margin 1.000"
     },
     {
       "model": "openai-community/gpt2",
@@ -188,7 +188,7 @@
       "dtype": "fp16",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 0.0014104372821748257,
+      "max_rel_diff": 0.0010578279616311193,
       "flips": 1,
       "real_flips": 0,
       "note": ""
@@ -211,7 +211,7 @@
       "check": "generate (batched+cache vs alone, no cache)",
       "status": "OK",
       "max_rel_diff": null,
-      "flips": 1,
+      "flips": 2,
       "real_flips": 0,
       "note": ""
     },
@@ -320,7 +320,7 @@
       "dtype": "fp32",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 2.268021717100055e-06,
+      "max_rel_diff": 2.697616537261638e-06,
       "flips": 0,
       "real_flips": 0,
       "note": ""
@@ -353,7 +353,7 @@
       "dtype": "bf16",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 0.01899999938905239,
+      "max_rel_diff": 0.024193547666072845,
       "flips": 0,
       "real_flips": 0,
       "note": ""
@@ -386,8 +386,8 @@
       "dtype": "fp16",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 0.0026302605401724577,
-      "flips": 0,
+      "max_rel_diff": 0.0022102161310613155,
+      "flips": 1,
       "real_flips": 0,
       "note": ""
     },
@@ -452,7 +452,7 @@
       "dtype": "bf16",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 0.02259887009859085,
+      "max_rel_diff": 0.03932584449648857,
       "flips": 3,
       "real_flips": 0,
       "note": ""
@@ -518,7 +518,7 @@
       "dtype": "fp32",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 1.6282842807413545e-06,
+      "max_rel_diff": 4.0278623600897845e-06,
       "flips": 0,
       "real_flips": 0,
       "note": ""
@@ -551,8 +551,8 @@
       "dtype": "bf16",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 0.025423727929592133,
-      "flips": 3,
+      "max_rel_diff": 0.01536312885582447,
+      "flips": 1,
       "real_flips": 0,
       "note": ""
     },
@@ -584,8 +584,8 @@
       "dtype": "fp16",
       "check": "padding (batched vs alone)",
       "status": "OK",
-      "max_rel_diff": 0.0028947368264198303,
-      "flips": 1,
+      "max_rel_diff": 0.002368421060964465,
+      "flips": 0,
       "real_flips": 0,
       "note": ""
     },
