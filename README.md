@@ -66,6 +66,8 @@ sdpa receives a boolean mask instead, outputs exact zeros at padding positions, 
 
 **Prior report.** The symptom (Qwen2, eager attention, fp16 → NaN) was reported in Transformers PR [#33317](https://github.com/huggingface/transformers/pull/33317) (September 2024), which was closed. That PR attributed the NaN to q·k overflow on long inputs and proposed computing q·k and the mask addition in fp32. This project rediscovered the symptom independently through differential testing and measured a different trigger: the mask addition overflows with modest negative scores on fully masked padding rows. The fp32 mask addition from that PR would also prevent it. It still reproduces in Transformers 5.23, with a standalone script: [`minimal_repro.py`](minimal_repro.py).
 
+**Reported upstream:** [huggingface/transformers#51079](https://github.com/huggingface/transformers/issues/51079), with the standalone reproduction, the measured cause, and both tested fixes.
+
 ### Hypotheses this project ruled out
 
 - **"Padding activations overflow fp16."** The first reproduction ([`repro.py`](repro.py)) used different prompts: all 100 trials were clean, and padding-position activations peaked at 1,281, about 50x below fp16's limit.
