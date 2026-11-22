@@ -47,7 +47,20 @@ sdpa receives a boolean mask instead, outputs exact zeros at padding positions, 
 
 **My first hypothesis was wrong.** I had attributed the NaN to an activation overflowing fp16 in layer 1's `o_proj`, because that was the first module the hooks flagged. Instrumenting inside the module showed `o_proj`'s input was already NaN, and recomputing `o_proj` in fp32 never exceeds 65,504 at real positions. Module-level hooks can only blame modules; this failure happens in functional code between them.
 
-**Possible fixes (not yet tested):** add the mask in fp32 before the softmax (the fp32 sum above produced no −∞), or zero out fully masked query rows, as sdpa effectively does.
+**Two fixes, tested** ([`test_fixes.py`](test_fixes.py), results in [`test_fixes.json`](test_fixes.json)). Each replaces the eager attention function on the same failing inputs, compared with an fp32 eager reference over prefill and 15 decode steps:
+
+| Variant | NaN rows | Rows 1–5 vs. original | Row 0 max \|Δ\| vs fp32 | Row 0 argmax agreement |
+|---|---|---|---|---|
+| Original (Transformers) | row 0 | — | NaN | — |
+| My copy, no fix (control) | row 0 | bit-identical | NaN | — |
+| **Add the mask in fp32** | none | **bit-identical** | 0.0545 | 16/16 |
+| **Zero rows with no allowed key** | none | **bit-identical** | 0.0545 | 16/16 |
+| sdpa fp16 (baseline) | none | different kernel | 0.0336 | 16/16 |
+
+- The control reproduces the library's output bit for bit, including the NaN, so the comparison is valid.
+- Both fixes change nothing for the rows the bug never touched, and leave row 0 as accurate as the other eager rows (0.041–0.071).
+- Both give row 0 identical numbers: real tokens give padding keys a weight of exactly 0, so what a padding row holds doesn't matter, as long as it is finite.
+- sdpa is slightly more accurate on every row, a kernel difference that predates either fix.
 
 **Prior report.** The symptom (Qwen2, eager attention, fp16 → NaN) was reported in Transformers PR [#33317](https://github.com/huggingface/transformers/pull/33317) (September 2024), which was closed. This project rediscovered it independently through differential testing and narrows it to a specific layer, input condition, and decoding path. It still reproduces in Transformers 5.23.
 
@@ -93,6 +106,8 @@ triage.json   triage output from the run above
 snapshot.py   first-non-finite snapshot + attention probe (inputs copied before each module runs)
 confirm_mask_overflow.py  measures whether fp16 score + mask rounds to -inf
 snapshot*.json, confirm_mask_overflow.json  outputs of the two scripts above (RTX 3060)
+test_fixes.py  tests the two fixes against an fp32 reference, with a bit-identical control
+test_fixes.json  its results (RTX 3060)
 ```
 
 **Note on `triage.json`:** the committed file was generated before the `NON-FINITE` fix in `triage.py`. For Qwen2.5 eager fp16, row 0 (the 3-token prompt), its cached-path error is NaN but the file labels the row `rounding`. The current script reports that row as `NON-FINITE`. Re-running `python triage.py` regenerates the file.
