@@ -16,7 +16,7 @@ Prompts are deliberately uneven (one is 3 tokens long next to 37-token rows), so
 
 ## Results
 
-Run on an NVIDIA RTX 3060, PyTorch 2.15 (CUDA 13.4), Transformers 5.23. Models: GPT-2, SmolLM2-135M (Llama architecture), Qwen2.5-0.5B (RoPE, grouped-query attention). Attention: eager and sdpa. Precision: fp32, bf16, fp16.
+Run on an NVIDIA RTX 3060 with Transformers 5.23. The first run used PyTorch 2.15 (CUDA 13.4); the committed `results.json` and `triage.json` are from a re-run on PyTorch 2.11 (CUDA 12.8), with the same 54 checks and the same 8 flags. Models: GPT-2, SmolLM2-135M (Llama architecture), Qwen2.5-0.5B (RoPE, grouped-query attention). Attention: eager and sdpa. Precision: fp32, bf16, fp16.
 
 **54 checks: 46 passed, 8 flagged.** All 18 fp32 checks passed, with relative errors around 2×10⁻⁶. Triage of the 8 flags:
 
@@ -42,6 +42,8 @@ Re-running the exact inputs 30 times ([`repro2.py`](repro2.py)):
 4. Softmax over a row that is entirely −∞ is NaN. The NaN softmax rows were **exactly** the all-−∞ rows (34 of 34). Layer 0 had none.
 5. The NaN flows through `o_proj` (its input already held 2,176 NaN = 34 positions × 64 head dimensions, and no infinities) into the residual stream, and into the KV cache at all 34 padding positions from layer 2 on.
 6. In layer 2, the padding positions' keys are NaN. Masking can't remove them, because NaN + (−65,504) is still NaN, and one NaN score makes a whole softmax row NaN: all **518** of that sequence's attention rows in layer 2 (37 query positions × 14 heads) were NaN. From layer 3 on, the row's 3 real tokens are non-finite in the KV cache too, and its logits are NaN right after prefill.
+
+**Why only the cached path fails.** The padded full forward pass (prompt and continuation in one pass, no cache) is clean on the same row, though its 34 padding positions are also fully masked: [`confirm_mask_overflow.py --path full`](confirm_mask_overflow_full.json) shows 34 rows with no allowed key in both paths. The difference is the raw scores. Head 9's best score in those rows was **−17.375** in the prompt-only prefill, past the −16 threshold, but **−11.414** in the full pass, which is safe. A fully masked row gets the same −65,504 added to every key, so the offset cancels inside the softmax, and the row attends to every key in the pass, weighted by raw score. The prefill has 37 keys and the full pass has 52 (it includes the continuation), so the padding positions' hidden states differ, and by layer 1 head 9 lands on opposite sides of the threshold. Both paths are numerically fragile; one happened to cross.
 
 sdpa receives a boolean mask instead, outputs exact zeros at padding positions, and stays finite. bf16 and fp32 have exponent range to spare, so adding their minimum to a score of −17 does not overflow.
 
@@ -69,9 +71,9 @@ sdpa receives a boolean mask instead, outputs exact zeros at padding positions, 
 - **"Padding activations overflow fp16."** The first reproduction ([`repro.py`](repro.py)) used different prompts: all 100 trials were clean, and padding-position activations peaked at 1,281, about 50x below fp16's limit.
 - **"Layer 1's `o_proj` overflows."** Ruled out by direct instrumentation, as described above: the NaN comes from the attention mask overflowing to −∞, not from a large activation.
 
-### Open question
+### Resolved: why the first run reported token flips instead of NaN
 
-The first `kvdiff.py` run reported token flips for the Qwen2.5 eager fp16 cache check rather than NaN, although `repro2.py` produces NaN on every run with the same inputs. That discrepancy is unexplained.
+The first `kvdiff.py` run reported token flips for the Qwen2.5 eager fp16 cache check, while `repro2.py` produced NaN on the same inputs. The cause was a bug in kvdiff's own scoring: when combining rows into one result, a NaN worst error was overwritten by the next row's finite value. Row 0 was NaN and rows 1–5 were finite, so the NaN vanished from the summary and only row 0's broken argmaxes showed up, as flips. The check was still flagged, but mislabeled. After the one-line fix, the re-run reports `rel=nan` for that check; every other check is unchanged.
 
 ## Methodology notes
 
@@ -106,8 +108,8 @@ triage.json   triage output from the run above
 snapshot.py   first-non-finite snapshot + attention probe (inputs copied before each module runs)
 confirm_mask_overflow.py  measures whether fp16 score + mask rounds to -inf
 snapshot*.json, confirm_mask_overflow.json  outputs of the two scripts above (RTX 3060)
+confirm_mask_overflow_full.json  the same check on the padded full forward pass (no overflow)
 test_fixes.py  tests the two fixes against an fp32 reference, with a bit-identical control
 test_fixes.json  its results (RTX 3060)
 ```
 
-**Note on `triage.json`:** the committed file was generated before the `NON-FINITE` fix in `triage.py`. For Qwen2.5 eager fp16, row 0 (the 3-token prompt), its cached-path error is NaN but the file labels the row `rounding`. The current script reports that row as `NON-FINITE`. Re-running `python triage.py` regenerates the file.
