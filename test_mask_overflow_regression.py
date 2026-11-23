@@ -106,3 +106,13 @@ def test_unaffected_rows_match_fp32_reference():
     q32, k32, v32, m32 = (t.float() for t in (q, k, v, mask))
     _, w_ref = call(make_eager(None), q32, k32, v32, m32)
     torch.testing.assert_close(w_fix[0, 0, REAL_ROWS].float(), w_ref[0, 0, REAL_ROWS], atol=1e-3, rtol=1e-3)
+
+
+def test_zero_rows_safe_gradients_are_exactly_zero_where_expected():
+    """Fully masked query rows get zero weights, and real rows give padding keys zero weight,
+    so no gradient should reach the padding rows' queries or the padding positions' keys and values."""
+    gq, gk, gv = grads("zero_rows_safe")
+    assert (gq[0, 0, PAD_ROWS] == 0).all()
+    assert (gk[0, 0, PAD_ROWS] == 0).all()
+    assert (gv[0, 0, PAD_ROWS] == 0).all()
+    assert (gq[0, 0, REAL_ROWS] != 0).any()      # control: real rows still get gradient
